@@ -4,30 +4,30 @@ import Konva from "konva";
 import "./App.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const videos = [
-  {
-    src: "https://www.w3schools.com/html/mov_bbb.mp4", // laggy one
-  },
-  {
-    src:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  },
-  {
-    //  small video
-    src:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  },
-  {
-    src:
-      "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c4/Physicsworks.ogv/Physicsworks.ogv.240p.vp9.webm",
-  },
-];
-const videoSrc = videos[2].src;
+// const videos = [
+//   {
+//     src: "https://www.w3schools.com/html/mov_bbb.mp4", // laggy one
+//   },
+//   {
+//     src:
+//       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+//   },
+//   {
+//     //  small video
+//     src:
+//       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+//   },
+//   {
+//     src:
+//       "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c4/Physicsworks.ogv/Physicsworks.ogv.240p.vp9.webm",
+//   },
+// ];
+// const videoSrc = videos[2].src;
 
 // Change value here
-const loopTill = 35; // in seconds
+// const loopTill = 35; // in seconds
 
-const Video = ({ video, width, height }) => {
+const Video = ({ video, width, height, loopTill }) => {
   const anim = useRef(null);
   const imageRef = useRef(null);
   const videoInit = useRef(true);
@@ -62,8 +62,6 @@ const Video = ({ video, width, height }) => {
 
     let totalTimeSpent = 0;
     const loopVideo = () => {
-      totalTimeSpent = totalTimeSpent + 1;
-
       if (totalTimeSpent >= loopTill) {
         clearInterval(runCount);
         stopVideo();
@@ -76,10 +74,11 @@ const Video = ({ video, width, height }) => {
         console.log("Video loop count=", loopCount, "times");
         startVideo();
       }
+      totalTimeSpent = totalTimeSpent + 1;
     };
 
     const runCount = setInterval(loopVideo, 1000);
-  }, [video, startVideo, stopVideo]);
+  }, [video, startVideo, stopVideo, loopTill]);
 
   return (
     <>
@@ -97,28 +96,64 @@ const Video = ({ video, width, height }) => {
   );
 };
 export default function App() {
+  const [formValues, setFormValues] = useState({
+    videoSrc: "",
+    time: 0,
+  });
+  const [dataSubmitted, setDataSubmitted] = useState(false);
   const videoRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [videoSize, setVideoSize] = useState({
     width: 0,
     height: 0,
   });
+  const tt = () => {
+    if (formValues.videoSrc !== "" && parseInt(formValues.time) > 0) {
+      setDataSubmitted(true);
+    }
+  };
   return (
     <div className="App">
-      <video
-        style={{ display: "none" }}
-        ref={videoRef}
-        onLoadedData={(el) => {
-          setVideoSize({
-            width: el.target.videoWidth,
-            height: el.target.videoHeight,
-          });
-          setLoading(false);
+      http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
+      <br />
+      <input
+        type="text"
+        placeholder="video url"
+        onChange={(e) => {
+          setFormValues((formValues) => ({
+            ...formValues,
+            videoSrc: e.target.value,
+          }));
         }}
-        src={videoSrc}
-        // src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-        muted
       />
+      <input
+        type="text"
+        placeholder="time is sec"
+        onChange={(e) =>
+          setFormValues((formValues) => ({
+            ...formValues,
+            time: parseInt(e.target.value),
+          }))
+        }
+      />
+      <button type="button" onClick={tt}>
+        start
+      </button>
+      {dataSubmitted && (
+        <video
+          style={{ display: "none" }}
+          ref={videoRef}
+          onLoadedData={(el) => {
+            setVideoSize({
+              width: el.target.videoWidth,
+              height: el.target.videoHeight,
+            });
+            setLoading(false);
+          }}
+          src={formValues.videoSrc}
+          muted
+        />
+      )}
       {!loading ? (
         <Stage width={window.innerWidth} height={window.innerHeight}>
           <Layer>
@@ -126,11 +161,12 @@ export default function App() {
               width={videoSize.width}
               height={videoSize.height}
               video={videoRef.current}
+              loopTill={formValues.time}
             />
           </Layer>
         </Stage>
       ) : (
-        "Video loading..."
+        dataSubmitted && <p>Video loading...</p>
       )}
     </div>
   );
