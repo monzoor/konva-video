@@ -139,6 +139,7 @@ export default function App() {
       </ul>
       <br />
       <input
+        disabled={dataSubmitted}
         type="text"
         placeholder="video url"
         value={formValues.videoSrc}
@@ -152,6 +153,7 @@ export default function App() {
       />
       <input
         type="number"
+        disabled={dataSubmitted}
         placeholder="time is sec"
         value={formValues.time}
         onChange={(e) => {
@@ -164,7 +166,7 @@ export default function App() {
           }));
         }}
       />
-      <button type="button" onClick={startVideo}>
+      <button type="button" disabled={dataSubmitted} onClick={startVideo}>
         start
       </button>
       <button type="button" onClick={resetVideo}>
